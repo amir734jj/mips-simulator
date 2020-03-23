@@ -16,11 +16,7 @@ namespace Core.Models
 
         public override Context Pipeline(Context context)
         {
-            return new Context(
-                context.Instructions,
-                context.Registers,
-                context.Memory
-            );
+            return context;
         }
     }
 }

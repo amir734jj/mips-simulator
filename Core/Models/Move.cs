@@ -18,11 +18,7 @@ namespace Core.Models
 
         public override Context Pipeline(Context context)
         {
-            return new Context(
-                context.Instructions,
-                context.Registers.SetItem(R1, context.Registers.GetValueOrDefault(R2)),
-                context.Memory
-            );
+            return context.MutateRegisters(r => r.SetItem(R1, r.GetValueOrDefault(R2)));
         }
     }
 }
