@@ -1,2 +1,2 @@
 # mips-simulator
-Attempting to simulate MIPS in C#
+Attempting to simulate MIPS in C# ... and failed!
