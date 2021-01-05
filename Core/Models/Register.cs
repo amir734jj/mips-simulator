@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Core.Models
@@ -29,10 +29,10 @@ namespace Core.Models
 
         public static Register ToRegister(this string name)
         {
-            return RegisterTable.First(y => y.Value == name).Key;
+            return RegisterTable.First(y => $"${name}".Equals(y.Value, StringComparison.OrdinalIgnoreCase)).Key;
         }
 
-        private static readonly ImmutableDictionary<Register, string> RegisterTable = new Dictionary<Register, string>
+        private static readonly IReadOnlyDictionary<Register, string> RegisterTable = new Dictionary<Register, string>
         {
             [Register.Zero] = "$zero",
             [Register.At] = "$at",
@@ -66,6 +66,6 @@ namespace Core.Models
             [Register.Sp] = "$sp",
             [Register.S8] = "$s8",
             [Register.Ra] = "$ra",
-        }.ToImmutableDictionary();
+        };
     }
 }

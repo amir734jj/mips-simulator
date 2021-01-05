@@ -1,10 +1,14 @@
-using System.Collections.Generic;
 using System.Linq;
+using Core.Interfaces;
 using Core.Models;
+using Core.Tokens;
 using EnumsNET;
-using Pidgin;
-using static Pidgin.Parser;
-using String = System.String;
+using FParsec;
+using FParsec.CSharp;
+using Microsoft.FSharp.Collections;
+using Microsoft.FSharp.Core; // extension functions (combinators & helpers)
+using static FParsec.CSharp.PrimitivesCS; // combinator functions
+using static FParsec.CSharp.CharParsersCS; // pre-defined parsers
 
 namespace Core.Parser
 {
@@ -12,33 +16,40 @@ namespace Core.Parser
     {
         public MipsParser()
         {
-            var skipCommaP = Char(',').IgnoreResult();
+            var skipCommaP = Between(WS, Optional(CharP(',')), WS);
+            var splitP = WS.And(Opt(CharP(';'))).And(WS);
+            var quotedString = Between('"', ManyChars(NoneOf("\"")), '"');
 
-            var registerP = Char('$')
-                .Then(Enums.GetValues<Register>().Select(x => x.Name())
-                    .Select(x => String(new string(x.Skip(1).ToArray())))
-                    .Aggregate((a, b) => a.Or(b))
-                    .Map(v => $"${v}".ToRegister()));
+            var registerP = CharP('$').AndR(Choice(Enums.GetValues<Register>()
+                .Select(x => x.Name())
+                .Select(x => StringCI(new string(x.Skip(1).ToArray()))).ToArray()));
 
-            var loadImmediateP = Map(
-                (a, b, c) => (Instruction) new LoadImmediate(b, c),
-                String(LoadImmediate.Name).Between(SkipWhitespaces),
-                registerP.Before(skipCommaP.Optional()).Between(SkipWhitespaces),
-                Num.Between(SkipWhitespaces)
-            );
+            var loadImmediateP = StringP("li").And(WS).AndR(registerP).AndL(skipCommaP).And(Int)
+                .Map(x => (IInstruction)new LoadImmediate(x.Item1.ToRegister(), x.Item2));
 
-            var moveP = Map(
-                (a, b, c) => (Instruction) new Move(b, c),
-                String(Move.Name).Between(SkipWhitespaces),
-                registerP.Before(skipCommaP.Optional()).Between(SkipWhitespaces),
-                registerP.Between(SkipWhitespaces)
-            );
+            var loadAddressP = StringP("la").And(WS).AndR(registerP).AndL(skipCommaP).And(ManyChars(NoneOf(" ")))
+                .Map(x => (IInstruction) new LoadAddress(x.Item1.ToRegister(), x.Item2));
+            
+            var moveP = StringP("move").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP)
+                .Map(x =>  (IInstruction)new Move(x.Item1.ToRegister(), x.Item2.ToRegister()));
 
-            var instructionsP = loadImmediateP.Or(moveP);
+            var syscallP = StringP("syscall").Return((IInstruction)new SystemCall());
+            var instructionP = Choice(loadImmediateP, moveP, loadAddressP, syscallP);
 
-            ProgramP = instructionsP.SeparatedAndOptionallyTerminated(EndOfLine);
+            var asciiP = StringP(".ascii").Return((IInstruction)new AsciiDirective());
+            var asciizP = StringP(".asciiz").Return((IInstruction)new AsciizDirective());
+            var textP = StringP(".text").Return((IInstruction)new TextDirective());
+            var codep = StringP(".code").Return((IInstruction)new CodeDirective());
+            var directiveP = Choice(asciiP, asciizP, textP, codep);
+            
+            var labelP = quotedString.AndL(CharP(':')).Map(x => (IInstruction) new Label(x));
+            var stringP = quotedString.Map(x => (IInstruction) new StringPrimitive(x));
+            var integerP = Int.AndL(CharP(':')).Map(x => (IInstruction) new IntegerPrimitive(x));
+            var primitiveP = Choice(labelP, stringP, integerP);
+
+            ProgramP = Many(Choice(instructionP, directiveP, primitiveP), splitP, true);
         }
 
-        public Parser<char, IEnumerable<Instruction>> ProgramP { get; }
+        public  FSharpFunc<CharStream<Unit>,Reply<FSharpList<IInstruction>>> ProgramP { get; }
     }
 }

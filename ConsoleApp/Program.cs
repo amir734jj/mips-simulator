@@ -1,6 +1,7 @@
 ﻿using System;
+using System.IO;
 using Core.Parser;
-using Pidgin;
+using FParsec.CSharp;
 
 namespace ConsoleApp
 {
@@ -8,10 +9,11 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            const string code = "move $t0, $t0 \n" + 
-                                "li $t0 555";
+            var projectDirectory = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName;
 
-            var result = new MipsParser().ProgramP.Parse(code);
+            var code = File.ReadAllText(Path.Join(projectDirectory, "code.s"));
+
+            var result = new MipsParser().ProgramP.ParseString(code);
 
             Console.WriteLine("Hello World!");
         }
