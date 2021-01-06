@@ -7,7 +7,7 @@ Features:
 TODO:
 - Runtime stack bases simulator
 
-```mips
+```Assembly
     .text
 str:   .asciiz "number is: "
     .code
