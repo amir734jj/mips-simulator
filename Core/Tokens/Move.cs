@@ -14,5 +14,10 @@ namespace Core.Tokens
             R1 = r1;
             R2 = r2;
         }
+        
+        public override string ToString()
+        {
+            return $"move {R1.Name()}, {R2.Name()}";
+        }
     }
 }

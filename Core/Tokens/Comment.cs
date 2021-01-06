@@ -2,18 +2,18 @@ using Core.Interfaces;
 
 namespace Core.Tokens
 {
-    public class StringPrimitive : IInstruction
+    public class Comment : IInstruction
     {
         public string Value { get; }
 
-        public StringPrimitive(string value)
+        public Comment(string value)
         {
             Value = value;
         }
-        
+
         public override string ToString()
         {
-            return @$"""{Value}""";
+            return $"#{Value}";
         }
     }
 }

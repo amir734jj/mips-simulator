@@ -10,5 +10,10 @@ namespace Core.Tokens
         {
             Number = 0;
         }
+        
+        public override string ToString()
+        {
+            return "syscall";
+        }
     }
 }

@@ -14,5 +14,10 @@ namespace Core.Tokens
             R1 = r1;
             Label = label;
         }
+        
+        public override string ToString()
+        {
+            return $"li {R1.Name()}, {Label}";
+        }
     }
 }

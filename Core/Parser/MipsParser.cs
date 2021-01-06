@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core.Interfaces;
 using Core.Models;
@@ -17,7 +19,6 @@ namespace Core.Parser
         public MipsParser()
         {
             var skipCommaP = Between(WS, Optional(CharP(',')), WS);
-            var splitP = WS.And(Opt(CharP(';'))).And(WS);
             var quotedString = Between('"', ManyChars(NoneOf("\"")), '"');
 
             var registerP = CharP('$').AndR(Choice(Enums.GetValues<Register>()
@@ -34,20 +35,26 @@ namespace Core.Parser
                 .Map(x =>  (IInstruction)new Move(x.Item1.ToRegister(), x.Item2.ToRegister()));
 
             var syscallP = StringP("syscall").Return((IInstruction)new SystemCall());
-            var instructionP = Choice(loadImmediateP, moveP, loadAddressP, syscallP);
 
-            var asciiP = StringP(".ascii").Return((IInstruction)new AsciiDirective());
+            var asciiP = StringP(".ascii").AndRTry(NotFollowedBy(CharP('z'))).Return((IInstruction)new AsciiDirective());
             var asciizP = StringP(".asciiz").Return((IInstruction)new AsciizDirective());
             var textP = StringP(".text").Return((IInstruction)new TextDirective());
             var codep = StringP(".code").Return((IInstruction)new CodeDirective());
-            var directiveP = Choice(asciiP, asciizP, textP, codep);
             
-            var labelP = quotedString.AndL(CharP(':')).Map(x => (IInstruction) new Label(x));
+            var labelP = ManyChars(NoneOf(new[] {' ', ':', ';', '#', '\n'})).AndLTry(CharP(':'))
+                .Map(x => (IInstruction) new Label(x));
             var stringP = quotedString.Map(x => (IInstruction) new StringPrimitive(x));
-            var integerP = Int.AndL(CharP(':')).Map(x => (IInstruction) new IntegerPrimitive(x));
-            var primitiveP = Choice(labelP, stringP, integerP);
+            var integerP = Int.Map(x => (IInstruction) new IntegerPrimitive(x));
+            var commentP = CharP('#').AndR(Many1Chars(NoneOf(new[] {'\n'}))).Map(x => (IInstruction) new Comment(x));
+            var semicolonP = CharP(';').Map(x => (IInstruction) new Semicolon());
 
-            ProgramP = Many(Choice(instructionP, directiveP, primitiveP), splitP, true);
+            var atomicP = new[]
+            {
+                labelP, stringP, integerP, commentP, semicolonP, asciiP, asciizP, textP,
+                codep, loadImmediateP, moveP, loadAddressP, syscallP
+            };
+            
+            ProgramP = WS.AndR(Many(Choice(atomicP), WS, true));
         }
 
         public  FSharpFunc<CharStream<Unit>,Reply<FSharpList<IInstruction>>> ProgramP { get; }

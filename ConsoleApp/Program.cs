@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Core.Parser;
+using FParsec;
 using FParsec.CSharp;
 
 namespace ConsoleApp
@@ -15,7 +16,15 @@ namespace ConsoleApp
 
             var result = new MipsParser().ProgramP.ParseString(code);
 
-            Console.WriteLine("Hello World!");
+            Console.WriteLine(result.Status == ReplyStatus.Ok);
+
+            if (result.Status == ReplyStatus.Ok)
+            {
+                foreach (var instruction in result.Result)
+                {
+                    Console.WriteLine(instruction);
+                }
+            }
         }
     }
 }

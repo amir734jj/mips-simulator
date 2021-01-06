@@ -2,11 +2,11 @@ using Core.Interfaces;
 
 namespace Core.Tokens
 {
-    public class TextDirective : IInstruction
+    public class Semicolon : IInstruction
     {
         public override string ToString()
         {
-            return ".text";
+            return ";";
         }
     }
 }
