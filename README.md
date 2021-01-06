@@ -2,7 +2,7 @@
 MIPS simulator in C#
 
 Features:
-- parser combinator using FParsec
+- Parser combinator using FParsec
 
 TODO:
 - Runtime stack bases simulator
