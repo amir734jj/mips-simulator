@@ -25,6 +25,12 @@ namespace Core.Parser
                 .Select(x => x.Name())
                 .Select(x => StringCI(new string(x.Skip(1).ToArray()))).ToArray()));
 
+            var addImmediateP = StringP("addi").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).AndL(skipCommaP).And(Int)
+                .Map(x => (IInstruction)new AddImmediate(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2));
+            
+            var addP = StringP("add").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).AndL(skipCommaP).And(registerP)
+                .Map(x => (IInstruction)new Add(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2.ToRegister()));
+            
             var loadImmediateP = StringP("li").And(WS).AndR(registerP).AndL(skipCommaP).And(Int)
                 .Map(x => (IInstruction)new LoadImmediate(x.Item1.ToRegister(), x.Item2));
 
@@ -36,7 +42,7 @@ namespace Core.Parser
 
             var syscallP = StringP("syscall").Return((IInstruction)new SystemCall());
 
-            var asciiP = StringP(".ascii").AndRTry(NotFollowedBy(CharP('z'))).Return((IInstruction)new AsciiDirective());
+            var asciiP = StringP(".ascii").Return((IInstruction)new AsciiDirective());
             var asciizP = StringP(".asciiz").Return((IInstruction)new AsciizDirective());
             var textP = StringP(".text").Return((IInstruction)new TextDirective());
             var codep = StringP(".code").Return((IInstruction)new CodeDirective());
@@ -50,8 +56,8 @@ namespace Core.Parser
 
             var atomicP = new[]
             {
-                labelP, stringP, integerP, commentP, semicolonP, asciiP, asciizP, textP,
-                codep, loadImmediateP, moveP, loadAddressP, syscallP
+                labelP, stringP, integerP, commentP, semicolonP, asciizP, asciiP , textP,
+                codep, loadImmediateP, moveP, loadAddressP, syscallP, addImmediateP, addP
             };
             
             ProgramP = WS.AndR(Many(Choice(atomicP), WS, true));

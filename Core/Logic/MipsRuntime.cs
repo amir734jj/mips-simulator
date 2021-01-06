@@ -18,7 +18,7 @@ namespace Core.Logic
 
         public void Process()
         {
-            var lookup = new Dictionary<string, Label>();
+            /*var lookup = new Dictionary<string, Label>();
             var memory = new Dictionary<Register, object>();
 
             for (var index = 0; index < _instructions.Count; index++)
@@ -33,7 +33,7 @@ namespace Core.Logic
                     case List<>
                         
                 }
-            }
+            }*/
         }
     }
 }
