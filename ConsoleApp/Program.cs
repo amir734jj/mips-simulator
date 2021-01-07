@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using Core.Logic;
 using Core.Parser;
 using FParsec;
 using FParsec.CSharp;
@@ -22,9 +24,11 @@ namespace ConsoleApp
             {
                 foreach (var instruction in result.Result)
                 {
-                    Console.WriteLine(instruction);
+                    // Console.WriteLine(instruction);
                 }
             }
+            
+            new MipsRuntime(result.Result.ToList()).Process();
         }
     }
 }
