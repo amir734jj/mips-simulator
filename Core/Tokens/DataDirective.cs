@@ -2,11 +2,11 @@ using Core.Interfaces;
 
 namespace Core.Tokens
 {
-    public class CodeDirective : IInstruction
+    public class DataDirective : IInstruction
     {
         public override string ToString()
         {
-            return ".code";
+            return ".data";
         }
     }
 }

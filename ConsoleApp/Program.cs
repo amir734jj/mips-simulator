@@ -24,7 +24,7 @@ namespace ConsoleApp
             {
                 foreach (var instruction in result.Result)
                 {
-                    // Console.WriteLine(instruction);
+                     //Console.WriteLine(instruction);
                 }
             }
             
