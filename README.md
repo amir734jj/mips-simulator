@@ -3,9 +3,10 @@ MIPS simulator in C#
 
 Features:
 - Parser combinator using FParsec
+- Runtime stack bases simulator
 
 TODO:
-- Runtime stack bases simulator
+- add branch and jump support
 
 ```Assembly
     .text
