@@ -39,6 +39,7 @@ Specifications:
 
 TODO:
 - static memory support
+- semantic analysis
 
 Notes:
 - I included a factorial MIPS example so demonstrate the recursion support thanks to stack
