@@ -6,6 +6,9 @@ Features:
 - Basic instruction set including **integer** arithmetic, branch, jump
 - Stack support
 
+![factorial MIPS](demo.gif)
+
+
 Specifications: 
 - supported system calls: 1, 4, 5, 10
 - supported directives:
