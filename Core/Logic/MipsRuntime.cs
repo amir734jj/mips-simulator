@@ -53,6 +53,12 @@ namespace Core.Logic
                     case Sub sub:
                         registers[sub.R1] = registers[sub.R2] - registers[sub.R3];
                         break;
+                    case Multiply multiply:
+                        registers[multiply.R1] = registers[multiply.R2] * registers[multiply.R3];
+                        break;
+                    case Divide divide:
+                        registers[divide.R1] = registers[divide.R2] / registers[divide.R3];
+                        break;
                     case AddImmediate addImmediate:
                         registers[addImmediate.R1] = registers[addImmediate.R2] + addImmediate.Value;
                         break;
@@ -70,7 +76,7 @@ namespace Core.Logic
                     case StoreWord storeWord:
                         var storeWordAddress = storeWord.Offset + registers[storeWord.R2];
                         var storeWordAdjustment = (memory.Length - storeWordAddress) / 4;
-                        registers[storeWord.R1] = memory[^storeWordAdjustment];
+                        memory[^storeWordAdjustment] = registers[storeWord.R1];
                         break;
                     case Move move:
                         registers[move.R1] = registers[move.R2];
