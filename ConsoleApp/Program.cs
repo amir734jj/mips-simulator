@@ -18,7 +18,7 @@ namespace ConsoleApp
 
             var result = new MipsParser().ProgramP.ParseString(code);
 
-            Console.WriteLine(result.Status == ReplyStatus.Ok);
+            // Console.WriteLine(result.Status == ReplyStatus.Ok);
 
             if (result.Status == ReplyStatus.Ok)
             {
