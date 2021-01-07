@@ -6,3 +6,8 @@ Features:
 - Basic instruction set including **integer** arithmetic, branch, jump
 - Stack support
 
+TODO:
+- static memory support
+
+Notes:
+- I included a factorial MIPS example so demonstrate the recursion support thanks to stack
