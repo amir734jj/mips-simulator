@@ -177,7 +177,6 @@ namespace Core.Logic
                                                 Console.WriteLine(stringPrimitive.Value);
                                                 break;
                                         }
-
                                         break;
                                 }
                                 break;
