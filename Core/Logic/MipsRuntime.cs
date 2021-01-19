@@ -22,7 +22,7 @@ namespace Core.Logic
         {
             var labelLookUp = new Dictionary<string, Label>();
             var registers = Enums.GetValues<Register>().ToDictionary(x => x, _ => 0);
-            var memory = new int[100];
+            var memory = new int[_instructions.Count];
             registers[Register.Sp] = memory.Length;
 
             var mainIndex = 0;

@@ -50,6 +50,7 @@ namespace Core.Parser
 
             var syscallP = StringP("syscall").Return((IInstruction)new SystemCall());
 
+            var wordP = StringP(".word").Return((IInstruction)new Word());
             var asciiP = StringP(".ascii").Return((IInstruction)new AsciiDirective());
             var asciizP = StringP(".asciiz").Return((IInstruction)new AsciizDirective());
             var textP = StringP(".text").Return((IInstruction)new TextDirective());
@@ -112,7 +113,7 @@ namespace Core.Parser
 
             var atomicP = new[]
             {
-                labelP, stringLiteralP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP,
+                labelP, stringLiteralP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP, wordP,
                 dataP, loadImmediateP, moveP, loadAddressP, syscallP, addImmediateP, addP, subP, mulP, divP,
                 branchEqualsZeroP, branchNotEqualsZeroP, branchEqualsP, branchNotEqualsP, branchLessThanZeroP,
                 branchLessThanP, branchLessThanOrEqualsP, branchGreaterThanZeroP, branchGreaterThanP, branchGreaterThanOrEqualsP,
