@@ -16,6 +16,7 @@ Specifications:
   - .asciiz
   - .text
   - .data
+  - .word
 - supported instructions:
   - add
   - addi
@@ -31,6 +32,10 @@ Specifications:
   - bge
   - beqz
   - bneq
+  - blez
+  - bgez
+  - sll
+  - srl
   - j
   - jr
   - jal
