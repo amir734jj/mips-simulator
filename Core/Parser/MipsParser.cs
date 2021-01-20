@@ -24,6 +24,12 @@ namespace Core.Parser
                 .Select(x => x.Name())
                 .Select(x => StringCI(new string(x.Skip(1).ToArray()))).ToArray()));
 
+            var shiftRightP = StringP("srl").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).AndL(skipCommaP).And(Int)
+                .Map(x => (IInstruction)new ShiftRightLogical(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2));
+
+            var shiftLeftP = StringP("sll").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).AndL(skipCommaP).And(Int)
+                .Map(x => (IInstruction)new ShiftLeftLogical(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2));
+
             var addImmediateP = StringP("addi").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).AndL(skipCommaP).And(Int)
                 .Map(x => (IInstruction)new AddImmediate(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2));
             
@@ -50,6 +56,8 @@ namespace Core.Parser
 
             var syscallP = StringP("syscall").Return((IInstruction)new SystemCall());
 
+            var arrayInitializer = Int.AndLTry(CharP(':')).AndTry(Int)
+                .Map(x => (IInstruction) new ArrayInitializer(x.Item1, x.Item2));
             var wordP = StringP(".word").Return((IInstruction)new Word());
             var asciiP = StringP(".ascii").Return((IInstruction)new AsciiDirective());
             var asciizP = StringP(".asciiz").Return((IInstruction)new AsciizDirective());
@@ -119,8 +127,8 @@ namespace Core.Parser
 
             var atomicP = new[]
             {
-                stringLiteralP, labelP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP, wordP,
-                dataP, loadImmediateP, moveP, loadAddressP, syscallP, addImmediateP, addP, subP, mulP, divP,
+                arrayInitializer, stringLiteralP, labelP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP, wordP,
+                dataP, loadImmediateP, moveP, loadAddressP, syscallP, addImmediateP, shiftRightP, shiftLeftP, addP, subP, mulP, divP,
                 branchEqualsZeroP, branchNotEqualsZeroP, branchEqualsP, branchNotEqualsP, branchLessThanZeroP,
                 branchLessThanP, branchLessThanOrEqualsZeroP, branchLessThanOrEqualsP, branchGreaterThanZeroP,
                 branchGreaterThanP, branchGreaterThanOrEqualsZeroP, branchGreaterThanOrEqualsP,

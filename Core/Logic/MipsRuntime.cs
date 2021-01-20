@@ -22,8 +22,11 @@ namespace Core.Logic
         {
             var labelLookUp = new Dictionary<string, Label>();
             var registers = Enums.GetValues<Register>().ToDictionary(x => x, _ => 0);
-            var memory = new int[_instructions.Count];
+            var memory = new int[1000];
             registers[Register.Sp] = memory.Length;
+
+            var usedMemoryIndex = 0;
+            var labelTranslation = new Dictionary<string, int>();
 
             var mainIndex = 0;
             int index;
@@ -37,6 +40,29 @@ namespace Core.Logic
                         if (label.Value == "main")
                         {
                             mainIndex = index;
+                        }
+
+                        if (index + 2 < _instructions.Count && _instructions[index + 1] is Word)
+                        {
+                            switch (_instructions[index + 2])
+                            {
+                                case IntegerPrimitive integerPrimitive:
+                                    labelTranslation[label.Value] = usedMemoryIndex << 2;
+                                    memory[usedMemoryIndex] = integerPrimitive.Value;
+                                    usedMemoryIndex += 1;
+                                    break;
+                                case ArrayInitializer arrayInitializer:
+                                {
+                                    var correctedCount = arrayInitializer.Count >> 2;
+                                    labelTranslation[label.Value] = usedMemoryIndex << 2;
+                                    for (var i = usedMemoryIndex; i < correctedCount; i++)
+                                    {
+                                        memory[i] = arrayInitializer.DefaultValue;
+                                    }
+                                    usedMemoryIndex += correctedCount;
+                                    break;
+                                }
+                            }
                         }
                         break;
                 }
@@ -62,21 +88,34 @@ namespace Core.Logic
                     case AddImmediate addImmediate:
                         registers[addImmediate.R1] = registers[addImmediate.R2] + addImmediate.Value;
                         break;
+                    case ShiftRightLogical shiftRightLogical:
+                        registers[shiftRightLogical.R1] = registers[shiftRightLogical.R2] >> shiftRightLogical.Value;
+                        break;
+                    case ShiftLeftLogical shiftLeftLogical:
+                        registers[shiftLeftLogical.R1] = registers[shiftLeftLogical.R2] << shiftLeftLogical.Value;
+                        break;
                     case LoadImmediate loadImmediate:
                         registers[loadImmediate.R1] = loadImmediate.Value;
                         break;
                     case LoadAddress loadAddress:
-                        registers[loadAddress.R1] = _instructions.IndexOf(labelLookUp[loadAddress.Label]);
+                        if (labelTranslation.ContainsKey(loadAddress.Label))
+                        {
+                            registers[loadAddress.R1] = labelTranslation[loadAddress.Label];
+                        }
+                        else
+                        {
+                            registers[loadAddress.R1] = _instructions.IndexOf(labelLookUp[loadAddress.Label]);
+                        }
                         break;
                     case LoadWord loadWord:
                         var loadWordAddress = loadWord.Offset + registers[loadWord.R2];
-                        var loadWordAdjustment = (memory.Length - loadWordAddress) / 4;
-                        registers[loadWord.R1] = memory[^loadWordAdjustment];
+                        var loadWordAdjustment = loadWordAddress >> 2;
+                        registers[loadWord.R1] = memory[loadWordAdjustment];
                         break;
                     case StoreWord storeWord:
                         var storeWordAddress = storeWord.Offset + registers[storeWord.R2];
-                        var storeWordAdjustment = (memory.Length - storeWordAddress) / 4;
-                        memory[^storeWordAdjustment] = registers[storeWord.R1];
+                        var storeWordAdjustment = storeWordAddress >> 2;
+                        memory[storeWordAdjustment] = registers[storeWord.R1];
                         break;
                     case Move move:
                         registers[move.R1] = registers[move.R2];
@@ -213,6 +252,7 @@ namespace Core.Logic
                                 break;
                         }
                         break;
+                    case ArrayInitializer _:
                     case Label _:
                     case Comment _:
                     case Semicolon _:
