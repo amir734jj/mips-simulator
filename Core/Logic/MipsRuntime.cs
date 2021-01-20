@@ -191,7 +191,7 @@ namespace Core.Logic
                                                     cont = _instructions[labelIndex + 1] is AsciiDirective;
                                                     break;
                                                 case AsciizDirective _:
-                                                    Console.WriteLine(stringPrimitive.Value);
+                                                    Console.WriteLine(stringPrimitive.Value.Replace("\\n", "\r\n"));
                                                     break;
                                             }
 
