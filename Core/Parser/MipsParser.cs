@@ -56,7 +56,7 @@ namespace Core.Parser
             var textP = StringP(".text").Return((IInstruction)new TextDirective());
             var dataP = StringP(".data").Return((IInstruction)new DataDirective());
             
-            var labelP = ManyChars(NoneOf(new[] {' ', ':', ';', '#','\r' ,'\n'})).AndLTry(CharP(':'))
+            var labelP = Many1Chars(NoneOf(new[] {'"', ' ', ':', ';', '#','\r' ,'\n'})).AndLTry(CharP(':'))
                 .Map(x => (IInstruction) new Label(x));
             var stringLiteralP = quotedString.Map(x => (IInstruction) new StringPrimitive(x));
             var integerLiteralP = Int.Map(x => (IInstruction) new IntegerPrimitive(x));
@@ -93,6 +93,12 @@ namespace Core.Parser
             var branchGreaterThanZeroP = StringP("bgtz").And(WS).AndR(registerP).AndL(skipCommaP).And(stringP)
                 .Map(x => (IInstruction) new BranchGreaterThanZero(x.Item1.ToRegister(), x.Item2));
 
+            var branchGreaterThanOrEqualsZeroP = StringP("bgez").And(WS).AndR(registerP).AndL(skipCommaP).And(stringP)
+                .Map(x => (IInstruction) new BranchGreaterThanOrEqualsZero(x.Item1.ToRegister(), x.Item2));
+            
+            var branchLessThanOrEqualsZeroP = StringP("blez").And(WS).AndR(registerP).AndL(skipCommaP).And(stringP)
+                .Map(x => (IInstruction) new BranchLessThanOrEqualsZero(x.Item1.ToRegister(), x.Item2));
+
             var branchGreaterThanOrEqualsP = StringP("bge").And(WS).AndR(registerP).AndL(skipCommaP).And(registerP).And(skipCommaP).And(stringP)
                 .Map(x => (IInstruction) new BranchGreaterThanOrEquals(x.Item1.Item1.ToRegister(), x.Item1.Item2.ToRegister(), x.Item2));
 
@@ -113,10 +119,11 @@ namespace Core.Parser
 
             var atomicP = new[]
             {
-                labelP, stringLiteralP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP, wordP,
+                stringLiteralP, labelP, integerLiteralP, commentP, semicolonP, asciizP, asciiP, textP, wordP,
                 dataP, loadImmediateP, moveP, loadAddressP, syscallP, addImmediateP, addP, subP, mulP, divP,
                 branchEqualsZeroP, branchNotEqualsZeroP, branchEqualsP, branchNotEqualsP, branchLessThanZeroP,
-                branchLessThanP, branchLessThanOrEqualsP, branchGreaterThanZeroP, branchGreaterThanP, branchGreaterThanOrEqualsP,
+                branchLessThanP, branchLessThanOrEqualsZeroP, branchLessThanOrEqualsP, branchGreaterThanZeroP,
+                branchGreaterThanP, branchGreaterThanOrEqualsZeroP, branchGreaterThanOrEqualsP,
                 branchUnconditionalP, jumpAndLinkP, jumpRegisterP, jumpUnconditional, lwP, swP
             };
             

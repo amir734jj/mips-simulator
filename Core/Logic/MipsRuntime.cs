@@ -142,6 +142,12 @@ namespace Core.Logic
                             index = _instructions.IndexOf(labelLookUp[branchLessThanZero.Value]);
                         }
                         break;
+                    case BranchLessThanOrEqualsZero branchLessThanOrEqualsZero:
+                        if (registers[branchLessThanOrEqualsZero.R1] <= 0)
+                        {
+                            index = _instructions.IndexOf(labelLookUp[branchLessThanOrEqualsZero.Value]);
+                        }
+                        break;
                     case BranchGreaterThan branchGreaterThan:
                         if (registers[branchGreaterThan.R1] > registers[branchGreaterThan.R2])
                         {
@@ -154,7 +160,13 @@ namespace Core.Logic
                             index = _instructions.IndexOf(labelLookUp[branchGreaterThanOrEquals.Value]);
                         }
                         break;
-                    case SystemCall systemCall:
+                    case BranchGreaterThanOrEqualsZero branchGreaterThanOrEqualsZero:
+                        if (registers[branchGreaterThanOrEqualsZero.R1] >= 0)
+                        {
+                            index = _instructions.IndexOf(labelLookUp[branchGreaterThanOrEqualsZero.Value]);
+                        }
+                        break;
+                    case SystemCall _:
                         var systemCallNumber = registers[Register.V0];
                         switch (systemCallNumber)
                         {
@@ -162,23 +174,30 @@ namespace Core.Logic
                                 Console.Write(registers[Register.A0]);
                                 break;
                             case 4:
-                                var directive = _instructions[registers[Register.A0] + 1];
-                                var item = _instructions[registers[Register.A0] + 2];
+                                var labelIndex = registers[Register.A0];
+                                var directive = _instructions[labelIndex + 1];
+                                var cont = false;
 
-                                switch (item)
+                                do
                                 {
-                                    case StringPrimitive stringPrimitive:
-                                        switch (directive)
-                                        {
-                                            case AsciiDirective _:
-                                                Console.Write(stringPrimitive.Value);
-                                                break;
-                                            case AsciizDirective _:
-                                                Console.WriteLine(stringPrimitive.Value);
-                                                break;
-                                        }
-                                        break;
-                                }
+                                    switch (_instructions[labelIndex + 2])
+                                    {
+                                        case StringPrimitive stringPrimitive:
+                                            switch (directive)
+                                            {
+                                                case AsciiDirective _:
+                                                    Console.Write(stringPrimitive.Value.Replace("\\n", "\r\n"));
+                                                    labelIndex += 3;
+                                                    cont = _instructions[labelIndex + 1] is AsciiDirective;
+                                                    break;
+                                                case AsciizDirective _:
+                                                    Console.WriteLine(stringPrimitive.Value);
+                                                    break;
+                                            }
+
+                                            break;
+                                    }
+                                } while (cont);
                                 break;
                             case 5:
                                 registers[Register.V0] = int.Parse(Console.ReadLine() ?? "0");
@@ -186,8 +205,11 @@ namespace Core.Logic
                             case 10:
                                 Environment.Exit(0);
                                 break;
+                            case 11:
+                                Console.Write((char) registers[Register.A0]);
+                                break;
                             default:
-                                Console.WriteLine($"System call {systemCall} is not supported");
+                                Console.WriteLine($"System call {systemCallNumber} is not supported");
                                 break;
                         }
                         break;

@@ -9,4 +9,8 @@
       <ProjectReference Include="..\Core\Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="code.s" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    
 </Project>
