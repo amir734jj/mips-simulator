@@ -49,6 +49,7 @@ TODO:
 - static memory support
 - semantic analysis
 - pretty printer
+- floating point support
 
 Notes:
 - I included a factorial MIPS example so demonstrate the recursion support thanks to stack
